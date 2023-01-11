@@ -1,0 +1,18 @@
+import { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+const { streakType } = prisma;
+
+async function getStreakTypesApi(_: Request, res: Response) {
+  res.status(200).json(await streakType.findMany());
+}
+
+async function createStreakTypeApi(req: Request, res: Response): Promise<void> {
+  const { name } = req.body;
+  const newStreakType = await streakType.create({ data: { name } });
+
+  res.status(202).json(newStreakType);
+}
+
+export { getStreakTypesApi, createStreakTypeApi }

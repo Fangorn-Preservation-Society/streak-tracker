@@ -1,11 +1,12 @@
-import express, { Response } from "express"
+import express from "express"
+import { getStreakTypesApi, createStreakTypeApi } from "./api/streak-types"
 
 const app = express()
 const port = 3000
 
-app.get('/', (_, res: Response) => {
-  res.send('Hello World!')
-})
+app.use(express.json()) // for parsing application/json
+app.get('/streak-types', getStreakTypesApi)
+app.post('/streak-types', createStreakTypeApi)
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
