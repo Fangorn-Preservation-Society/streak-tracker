@@ -20,13 +20,19 @@ async function createStreakTypeApi(req: Request, res: Response): Promise<void> {
   const { name } = req.body;
   const newStreakType = await streakType.create({ data: { name } });
 
-  res.status(202).json(newStreakType);
+  res.status(201).json(newStreakType);
 }
 
+async function deleteStreakTypeApi(req: Request, res: Response): Promise<void> {
+  const { id } = req.params;
+  await streakType.delete({ where: { id: Number(id), }, });
+
+  res.status(202).json({});
+}
 // @TODO Update
 // Endpoint to change just the name of a streakType
 
 // @TODO Delete
 // Endpoint to delete a streaktype
 
-export { getStreakTypesApi, createStreakTypeApi, showStreakTypeApi }
+export { getStreakTypesApi, createStreakTypeApi, showStreakTypeApi, deleteStreakTypeApi }
