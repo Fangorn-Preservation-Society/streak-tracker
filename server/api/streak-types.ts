@@ -32,7 +32,19 @@ async function deleteStreakTypeApi(req: Request, res: Response): Promise<void> {
 // @TODO Update
 // Endpoint to change just the name of a streakType
 
-// @TODO Delete
-// Endpoint to delete a streaktype
+async function updateStreakTypeApi(req: Request, res: Response): Promise<void> {
+  const { id } = req.params;
+  const { name } = req.body;
 
-export { getStreakTypesApi, createStreakTypeApi, showStreakTypeApi, deleteStreakTypeApi }
+  const updateStreakType = await streakType.update({
+    where: {
+      id: Number(id)
+    },
+    data: {
+      name,
+    },
+  })
+  res.status(200).json(updateStreakType);
+}
+
+export { getStreakTypesApi, createStreakTypeApi, showStreakTypeApi, deleteStreakTypeApi, updateStreakTypeApi }
