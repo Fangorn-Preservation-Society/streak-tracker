@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker';
 import request from "supertest";
 
 
-import app from '../server/app'
+import app from '../app'
 
 const prisma = new PrismaClient()
 
