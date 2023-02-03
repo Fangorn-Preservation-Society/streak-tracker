@@ -89,5 +89,19 @@ describe('Streak Type API', () => {
     expect(updatedStreakType.name).toBe(newName)
   })
 
-})
+  it('[DELETE] should delete the streak type with provided id', async () => {
+    // Arrange
+    const name = faker.animal.cat()
+    const saved = await prisma.streakType.create({ data: { name } })
 
+    // Act
+    await request(app)
+      .delete(`/api/streak-types/${saved.id}`)
+      .set('Accept', 'application/json')
+
+    // Assert
+    const deletedStreakType = await prisma.streakType.findUnique({ where: { id: saved.id } })
+    expect(deletedStreakType).toBeNull()
+
+  })
+})
