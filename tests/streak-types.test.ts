@@ -8,7 +8,7 @@ import app from '../server/app'
 const prisma = new PrismaClient()
 
 describe('Streak Type API', () => {
-  it('should return all of the streak types', async () => {
+  it('[INDEX] should return all of the streak types', async () => {
     // Arrange
     const names = Array.from(Array(3)).map(() => faker.animal.cat())
 
@@ -32,7 +32,7 @@ describe('Streak Type API', () => {
     })
   })
 
-  it('should return the streak type with provided id', async () => {
+  it('[SHOW] should return the streak type with provided id', async () => {
     // Arrange
     const name = faker.animal.cat()
     const saved = await prisma.streakType.create({ data: { name } })
@@ -47,7 +47,7 @@ describe('Streak Type API', () => {
     expect(responseBody.name).toBe(name)
   })
 
-  it('should create a streak type with the provided name', async () => {
+  it('[CREATE] should create a streak type with the provided name', async () => {
     //Arrange
     const name = faker.animal.crocodilia();
 
@@ -58,14 +58,36 @@ describe('Streak Type API', () => {
       .set('Accept', 'application/json')
     const responseBody = response.body
 
-    const streakTypeFromDB = await prisma.streakType.findMany({
+    const streakTypes = await prisma.streakType.findMany({
       where: { name }
     })
-    const firstType = streakTypeFromDB[0]
+    const firstType = streakTypes[0]
 
     //Assert
     expect(responseBody.name).toBe(name)
-    expect(firstType.name).toBe(name);
+    expect(firstType.name).toBe(name)
   })
+
+  it('[UPDATE] should update the name of specified streak type', async () => {
+    // Arrange
+    const name = faker.animal.cat()
+    const newName = faker.animal.rabbit()
+    const saved = await prisma.streakType.create({ data: { name } })
+
+    // Act
+    const response = await request(app)
+      .put(`/api/streak-types/${saved.id}`)
+      .send({ name: newName })
+      .set('Accept', 'application/json')
+    const responseBody = response.body
+
+    // Assert
+    expect(responseBody.name).toBe(newName)
+    const updatedStreakType = await prisma.streakType.findUnique({ where: { id: saved.id } })
+    expect(updatedStreakType).not.toBeNull()
+    if (updatedStreakType === null) { throw new Error('Streak type did not exist') }
+    expect(updatedStreakType.name).toBe(newName)
+  })
+
 })
 
