@@ -2,6 +2,7 @@ import { PrismaClient, StreakType } from "@prisma/client";
 import { faker } from '@faker-js/faker';
 import request from "supertest";
 
+
 import app from '../server/app'
 
 const prisma = new PrismaClient()
@@ -37,7 +38,7 @@ describe('Streak Type API', () => {
     const saved = await prisma.streakType.create({ data: { name } })
 
     // Act
-     const response = await request(app)
+    const response = await request(app)
       .get(`/api/streak-types/${saved.id}`)
       .set('Accept', 'application/json')
     const responseBody = response.body
@@ -45,4 +46,26 @@ describe('Streak Type API', () => {
     // Assert
     expect(responseBody.name).toBe(name)
   })
+
+  it('should create a streak type with the provided name', async () => {
+    //Arrange
+    const name = faker.animal.crocodilia();
+
+    //Act
+    const response = await request(app)
+      .post(`/api/streak-types/`)
+      .send({ name })
+      .set('Accept', 'application/json')
+    const responseBody = response.body
+
+    const streakTypeFromDB = await prisma.streakType.findMany({
+      where: { name }
+    })
+    const firstType = streakTypeFromDB[0]
+
+    //Assert
+    expect(responseBody.name).toBe(name)
+    expect(firstType.name).toBe(name);
+  })
 })
+

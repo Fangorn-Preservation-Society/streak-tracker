@@ -6,7 +6,7 @@
   "scripts": {
     "server": "nodemon server/index.ts",
     "pretest": "npx prisma migrate reset --force",
-    "test": "jest --watch",
+    "test": "jest",
     "db:migrate": "npx prisma migrate dev",
     "db:reset": "npx prisma migrate reset"
   },
