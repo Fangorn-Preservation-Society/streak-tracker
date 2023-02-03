@@ -1,10 +1,13 @@
 # TODO
 
+ * BIG ITEMS *
+ - Frontend, need the react app
+ - Authentication, need users
+ - Streaks
+
  **TOGETHA**
- - Finish test suite
-    * Update
-    * Create
-    * Delete
+ - Authentication!!
+ - App restructuring!
 
 **MIKE**
 - Make test db refresh on every run
