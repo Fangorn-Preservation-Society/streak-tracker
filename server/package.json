@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "server": "nodemon index.ts",
-    "pretest": "npx prisma migrate reset --force",
     "test": "jest",
     "db:migrate": "npx prisma migrate dev",
     "db:reset": "npx prisma migrate reset"
@@ -37,11 +36,13 @@
     "@types/jest": "^29.2.6",
     "@types/jsonwebtoken": "^9.0.1",
     "@types/node": "^18.11.18",
+    "@types/uuid": "^9.0.0",
     "jest": "^29.3.1",
     "nodemon": "^2.0.20",
     "prisma": "^4.8.1",
     "supertest": "^6.3.3",
     "ts-jest": "^29.0.5",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "uuid": "^9.0.0"
   }
 }
