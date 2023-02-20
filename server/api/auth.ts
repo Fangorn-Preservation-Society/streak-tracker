@@ -11,6 +11,21 @@ interface Credentials {
 }
 
 const privateKey = String(process.env.TOKEN_KEY);
+const generateAndSaveToken = async function ({ email, id }: { email: string, id: string }) {
+  const token = jwt.sign({ userId: id, email }, privateKey, {
+    expiresIn: "2h",
+  });
+
+  await prisma.user.update({
+    where: {
+      id: id,
+    },
+    data: {
+      token,
+    },
+  });
+  return token;
+}
 
 export async function register(req: Request, res: Response) {
   const { email, password }: Credentials = req.body;
@@ -34,18 +49,7 @@ export async function register(req: Request, res: Response) {
     },
   });
 
-  const token = jwt.sign({ userId: user.id, email }, privateKey, {
-    expiresIn: "2h",
-  });
-
-  await prisma.user.update({
-    where: {
-      id: user.id,
-    },
-    data: {
-      token,
-    },
-  });
+  const token = await generateAndSaveToken({ id: user.id, email })
 
   return res.status(201).json({ id: user.id, token });
 }
@@ -69,18 +73,8 @@ export async function login(req: Request, res: Response) {
     return res.status(409).send("Password is incorrect. Please try again.");
   }
 
-  const token = jwt.sign({ userId: user.id, email }, privateKey, {
-    expiresIn: "2h",
-  });
+  const token = await generateAndSaveToken({ id: user.id, email })
 
-  await prisma.user.update({
-    where: {
-      id: user.id,
-    },
-    data: {
-      token,
-    },
-  });
 
   return res.status(200).json({ id: user.id, token });
 }
