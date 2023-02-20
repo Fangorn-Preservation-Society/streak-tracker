@@ -5,6 +5,8 @@
  - Authentication, need users
  - Streaks
 
+ Auth - make private key for signing JWTs
+
  **TOGETHA**
  - Authentication!!
  - App restructuring!
