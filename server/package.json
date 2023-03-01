@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "server": "nodemon index.ts",
+    "start": "nodemon index.ts",
     "test": "jest",
     "db:migrate": "npx prisma migrate dev",
     "db:reset": "npx prisma migrate reset"

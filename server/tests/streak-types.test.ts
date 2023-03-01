@@ -1,24 +1,46 @@
-import { StreakType } from '@prisma/client'
+import { StreakType, User } from '@prisma/client'
 import { faker } from '@faker-js/faker'
 import request from 'supertest'
 
 import { prisma } from '../prisma/'
 
 import app from '../app'
+import factories from './factories'
+
+let user: User
 
 describe('Streak Type API', () => {
-    it('[INDEX] should return all of the streak types', async () => {
+    beforeEach(async () => {
+        user = await factories.users.create({ password: 'chubby-puppy' })
+    })
+
+    it.only('[INDEX] should return all of the streak types for a user', async () => {
         // Arrange
         const names = Array.from(Array(3)).map(() => faker.animal.cat())
 
         await Promise.all(
-            names.map((name) => prisma.streakType.create({ data: { name } }))
+            names.map((name) =>
+                prisma.streakType.create({ data: { name, userId: user.id } })
+            )
         )
+        const shouldNotFind = await prisma.streakType.create({
+            data: {
+                name: faker.animal.cat(),
+                userId: (await factories.users.create()).id,
+            },
+        })
+
+        const tokenResponse = await request(app)
+            .post('/api/login')
+            .set('Accept', 'application/json')
+            .send({ email: user.email, password: 'chubby-puppy' })
+        const { token } = tokenResponse.body
 
         // Act
         const response = await request(app)
             .get('/api/streak-types')
             .set('Accept', 'application/json')
+            .set('x-access-token', token)
         const responseStreakTypes = response.body
 
         // Assert
@@ -26,12 +48,17 @@ describe('Streak Type API', () => {
         responseStreakTypes.forEach((s: StreakType) => {
             expect(names).toContain(s.name)
         })
+        expect(
+            responseStreakTypes.find((s: StreakType) => s.name === shouldNotFind.name)
+        ).toBeFalsy()
     })
 
-    it('[SHOW] should return the streak type with provided id', async () => {
+    it('[SHOW] should return the streak type with provided id for its owner', async () => {
         // Arrange
         const name = faker.animal.cat()
-        const saved = await prisma.streakType.create({ data: { name } })
+        const saved = await prisma.streakType.create({
+            data: { name, userId: user.id },
+        })
 
         // Act
         const response = await request(app)
@@ -68,7 +95,9 @@ describe('Streak Type API', () => {
         // Arrange
         const name = faker.animal.cat()
         const newName = faker.animal.rabbit()
-        const saved = await prisma.streakType.create({ data: { name } })
+        const saved = await prisma.streakType.create({
+            data: { name, userId: user.id },
+        })
 
         // Act
         const response = await request(app)
@@ -92,7 +121,9 @@ describe('Streak Type API', () => {
     it('[DELETE] should delete the streak type with provided id', async () => {
         // Arrange
         const name = faker.animal.cat()
-        const saved = await prisma.streakType.create({ data: { name } })
+        const saved = await prisma.streakType.create({
+            data: { name, userId: user.id },
+        })
 
         // Act
         await request(app)

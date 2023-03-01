@@ -8,13 +8,9 @@
  Auth 
   - make private key for signing JWTs
   - process.env for private key and stuff
- 
+  - Extract auth middleware to own file
+  - add tests for auth
+  - factory for logged in user w/ Token
 
  **TOGETHA**
- - Authentication!!
  - App restructuring!
-
-**MIKE**
-- Make test db refresh on every run
-- make a separate DB for testing vs. application itself
-- set up your formatter you fucking scrub
