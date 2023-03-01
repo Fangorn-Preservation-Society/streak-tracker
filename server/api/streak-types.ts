@@ -15,10 +15,15 @@ async function getStreakTypesApi(req: Request, res: Response) {
 
 // Show - get 1 specific prisma.streakType
 async function showStreakTypeApi(req: Request, res: Response) {
-    const { id } = req.params
-    res.status(200).json(
-        await prisma.streakType.findUnique({ where: { id: Number(id) } })
-    )
+    const { userId, params } = req
+    const { id } = params
+    const streakType = await prisma.streakType.findFirst({ where: { id: Number(id), userId } })
+
+    if (streakType) {
+        res.status(200).json(streakType)
+        return
+    }
+    res.status(404).json({ message: `unable to find streak type with id ${id}` })
 }
 
 // Create

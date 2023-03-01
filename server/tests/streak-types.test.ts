@@ -14,7 +14,7 @@ describe('Streak Type API', () => {
         user = await factories.users.create({ password: 'chubby-puppy' })
     })
 
-    it.only('[INDEX] should return all of the streak types for a user', async () => {
+    it('[INDEX] should return all of the streak types for a user', async () => {
         // Arrange
         const names = Array.from(Array(3)).map(() => faker.animal.cat())
 
@@ -60,14 +60,47 @@ describe('Streak Type API', () => {
             data: { name, userId: user.id },
         })
 
+        const tokenResponse = await request(app)
+            .post('/api/login')
+            .set('Accept', 'application/json')
+            .send({ email: user.email, password: 'chubby-puppy' })
+        const { token } = tokenResponse.body
+
         // Act
         const response = await request(app)
             .get(`/api/streak-types/${saved.id}`)
             .set('Accept', 'application/json')
+            .set('x-access-token', token)
         const responseBody = response.body
 
         // Assert
         expect(responseBody.name).toBe(name)
+    })
+
+    it('[SHOW] should prevent user from looking at other users\' streak types', async () => {
+        // Arrange
+        const name = faker.animal.cat()
+        const saved = await prisma.streakType.create({
+            data: { name, userId: user.id },
+        })
+        const wormtongue = await factories.users.create({ password: 'sarumanrules' })
+
+        const tokenResponse = await request(app)
+            .post('/api/login')
+            .set('Accept', 'application/json')
+            .send({ email: wormtongue.email, password: 'sarumanrules' })
+        const { token } = tokenResponse.body
+
+        // Act
+        const response = await request(app)
+            .get(`/api/streak-types/${saved.id}`)
+            .set('Accept', 'application/json')
+            .set('x-access-token', token)
+        const responseBody = response.body
+
+        // Assert
+        expect(response.statusCode).toBe(404)
+        expect(responseBody).toEqual({ message: `unable to find streak type with id ${saved.id}` })
     })
 
     it('[CREATE] should create a streak type with the provided name', async () => {
