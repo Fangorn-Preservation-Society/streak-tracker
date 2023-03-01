@@ -2,8 +2,15 @@ import { Request, Response } from 'express'
 import { prisma } from '../prisma'
 
 // Index - get a list of StreakTypes
-async function getStreakTypesApi(_: Request, res: Response) {
-    res.status(200).json(await prisma.streakType.findMany())
+async function getStreakTypesApi(req: Request, res: Response) {
+    const { userId } = req
+    res.status(200).json(
+        await prisma.streakType.findMany({
+            where: {
+                userId,
+            },
+        })
+    )
 }
 
 // Show - get 1 specific prisma.streakType
@@ -15,12 +22,12 @@ async function showStreakTypeApi(req: Request, res: Response) {
 }
 
 // Create
-async function createStreakTypeApi(req: Request, res: Response): Promise<void> {
-    const { name } = req.body
-    const newStreakType = await prisma.streakType.create({ data: { name } })
-
-    res.status(201).json(newStreakType)
-}
+// async function createStreakTypeApi(req: Request, res: Response): Promise<void> {
+// const { name } = req.body
+// const newStreakType = await prisma.streakType.create({ data: { name } })
+//
+// res.status(201).json(newStreakType)
+// }
 
 // Delete
 async function deleteStreakTypeApi(req: Request, res: Response): Promise<void> {
@@ -48,7 +55,7 @@ async function updateStreakTypeApi(req: Request, res: Response): Promise<void> {
 
 export {
     getStreakTypesApi,
-    createStreakTypeApi,
+    // createStreakTypeApi,
     showStreakTypeApi,
     deleteStreakTypeApi,
     updateStreakTypeApi,
