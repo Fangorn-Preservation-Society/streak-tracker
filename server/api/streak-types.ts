@@ -17,13 +17,17 @@ async function getStreakTypesApi(req: Request, res: Response) {
 async function showStreakTypeApi(req: Request, res: Response) {
     const { userId, params } = req
     const { id } = params
-    const streakType = await prisma.streakType.findFirst({ where: { id: Number(id), userId } })
+    const streakType = await prisma.streakType.findFirst({
+        where: { id: Number(id), userId },
+    })
 
     if (streakType) {
         res.status(200).json(streakType)
         return
     }
-    res.status(404).json({ message: `unable to find streak type with id ${id}` })
+    res.status(404).json({
+        message: `unable to find streak type with id ${id}`,
+    })
 }
 
 // Create
@@ -36,10 +40,22 @@ async function showStreakTypeApi(req: Request, res: Response) {
 
 // Delete
 async function deleteStreakTypeApi(req: Request, res: Response): Promise<void> {
-    const { id } = req.params
-    await prisma.streakType.delete({ where: { id: Number(id) } })
+    const { userId, params } = req
+    const { id } = params
+    const streakType = await prisma.streakType.findFirst({
+        where: { id: Number(id), userId },
+    })
 
-    res.status(202).json({})
+    if (streakType) {
+        await prisma.streakType.delete({ where: { id: streakType.id } })
+
+        res.status(202).json({})
+        return
+    }
+
+    res.status(404).json({
+        message: `unable to find streak type with id ${id}`,
+    })
 }
 
 // Update
