@@ -49,7 +49,9 @@ describe('Streak Type API', () => {
             expect(names).toContain(s.name)
         })
         expect(
-            responseStreakTypes.find((s: StreakType) => s.name === shouldNotFind.name)
+            responseStreakTypes.find(
+                (s: StreakType) => s.name === shouldNotFind.name
+            )
         ).toBeFalsy()
     })
 
@@ -77,13 +79,15 @@ describe('Streak Type API', () => {
         expect(responseBody.name).toBe(name)
     })
 
-    it('[SHOW] should prevent user from looking at other users\' streak types', async () => {
+    it("[SHOW] should prevent user from looking at other users' streak types", async () => {
         // Arrange
         const name = faker.animal.cat()
         const saved = await prisma.streakType.create({
             data: { name, userId: user.id },
         })
-        const wormtongue = await factories.users.create({ password: 'sarumanrules' })
+        const wormtongue = await factories.users.create({
+            password: 'sarumanrules',
+        })
 
         const tokenResponse = await request(app)
             .post('/api/login')
@@ -100,7 +104,9 @@ describe('Streak Type API', () => {
 
         // Assert
         expect(response.statusCode).toBe(404)
-        expect(responseBody).toEqual({ message: `unable to find streak type with id ${saved.id}` })
+        expect(responseBody).toEqual({
+            message: `unable to find streak type with id ${saved.id}`,
+        })
     })
 
     it('[CREATE] should create a streak type with the provided name', async () => {
@@ -151,22 +157,60 @@ describe('Streak Type API', () => {
         expect(updatedStreakType.name).toBe(newName)
     })
 
-    it('[DELETE] should delete the streak type with provided id', async () => {
+    it('[DELETE] should delete the streak type with provided id if initiated by owner', async () => {
         // Arrange
         const name = faker.animal.cat()
         const saved = await prisma.streakType.create({
             data: { name, userId: user.id },
         })
 
+        const tokenResponse = await request(app)
+            .post('/api/login')
+            .set('Accept', 'application/json')
+            .send({ email: user.email, password: 'chubby-puppy' })
+        const { token } = tokenResponse.body
+
         // Act
-        await request(app)
+        const response = await request(app)
             .delete(`/api/streak-types/${saved.id}`)
             .set('Accept', 'application/json')
+            .set('x-access-token', token)
 
         // Assert
+        expect(response.statusCode).toBe(202)
         const deletedStreakType = await prisma.streakType.findUnique({
             where: { id: saved.id },
         })
         expect(deletedStreakType).toBeNull()
+    })
+
+    it("[DELETE] should prevent user from deleting other users' streak types", async () => {
+        // Arrange
+        const name = faker.animal.cat()
+        const saved = await prisma.streakType.create({
+            data: { name, userId: user.id },
+        })
+        const wormtongue = await factories.users.create({
+            password: 'sarumanrules',
+        })
+
+        const tokenResponse = await request(app)
+            .post('/api/login')
+            .set('Accept', 'application/json')
+            .send({ email: wormtongue.email, password: 'sarumanrules' })
+        const { token } = tokenResponse.body
+
+        // Act
+        const response = await request(app)
+            .delete(`/api/streak-types/${saved.id}`)
+            .set('Accept', 'application/json')
+            .set('x-access-token', token)
+        const responseBody = response.body
+
+        // Assert
+        expect(response.statusCode).toBe(404)
+        expect(responseBody).toEqual({
+            message: `unable to find streak type with id ${saved.id}`,
+        })
     })
 })

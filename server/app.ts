@@ -51,7 +51,7 @@ app.post('/api/login', login)
 app.get('/api/streak-types', auth, getStreakTypesApi)
 app.get('/api/streak-types/:id', auth, showStreakTypeApi)
 // app.post("/api/streak-types", createStreakTypeApi);
-app.delete('/api/streak-types/:id', deleteStreakTypeApi)
+app.delete('/api/streak-types/:id', auth, deleteStreakTypeApi)
 app.put('/api/streak-types/:id', updateStreakTypeApi)
 
 export default app
