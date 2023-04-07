@@ -31,12 +31,16 @@ async function showStreakTypeApi(req: Request, res: Response) {
 }
 
 // Create
-// async function createStreakTypeApi(req: Request, res: Response): Promise<void> {
-// const { name } = req.body
-// const newStreakType = await prisma.streakType.create({ data: { name } })
-//
-// res.status(201).json(newStreakType)
-// }
+async function createStreakTypeApi(req: Request, res: Response): Promise<void> {
+    const { userId, body } = req
+    const { name } = body
+
+    const newStreakType = await prisma.streakType.create({
+        data: { name: String(name), userId: String(userId) },
+    })
+
+    res.status(201).json(newStreakType)
+}
 
 // Delete
 async function deleteStreakTypeApi(req: Request, res: Response): Promise<void> {
@@ -88,7 +92,7 @@ async function updateStreakTypeApi(req: Request, res: Response): Promise<void> {
 
 export {
     getStreakTypesApi,
-    // createStreakTypeApi,
+    createStreakTypeApi,
     showStreakTypeApi,
     deleteStreakTypeApi,
     updateStreakTypeApi,

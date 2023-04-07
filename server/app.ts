@@ -2,7 +2,7 @@ import express, { NextFunction, Request, Response } from 'express'
 import { login, register } from './api/auth'
 import {
   getStreakTypesApi,
-  // createStreakTypeApi,
+  createStreakTypeApi,
   showStreakTypeApi,
   deleteStreakTypeApi,
   updateStreakTypeApi,
@@ -50,7 +50,7 @@ app.post('/api/login', login)
 // Streak Routes
 app.get('/api/streak-types', auth, getStreakTypesApi)
 app.get('/api/streak-types/:id', auth, showStreakTypeApi)
-// app.post("/api/streak-types", createStreakTypeApi);
+app.post("/api/streak-types", auth, createStreakTypeApi);
 app.delete('/api/streak-types/:id', auth, deleteStreakTypeApi)
 app.put('/api/streak-types/:id', auth, updateStreakTypeApi)
 
