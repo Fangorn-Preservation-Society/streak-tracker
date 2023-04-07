@@ -109,25 +109,32 @@ describe('Streak Type API', () => {
         })
     })
 
-    it('[CREATE] should create a streak type with the provided name', async () => {
-        //Arrange
-        const name = faker.animal.crocodilia()
+    it('[CREATE] should create a streak type with provided name if initiated by authed user', async () => {
+        // Arrange
+        const tokenResponse = await request(app)
+            .post('/api/login')
+            .set('Accept', 'application/json')
+            .send({ email: user.email, password: 'chubby-puppy' })
+        const { token } = tokenResponse.body
 
-        //Act
+        // Act
         const response = await request(app)
             .post(`/api/streak-types/`)
-            .send({ name })
             .set('Accept', 'application/json')
+            .set('x-access-token', token)
+            .send({ name: 'gollum' })
         const responseBody = response.body
 
-        const streakTypes = await prisma.streakType.findMany({
-            where: { name },
+        // Assert
+        expect(response.statusCode).toBe(201)
+        expect(responseBody.name).toBe('gollum')
+        const createdStreakType = await prisma.streakType.findFirst({
+            where: { userId: user.id, name: 'gollum' },
         })
-        const firstType = streakTypes[0]
-
-        //Assert
-        expect(responseBody.name).toBe(name)
-        expect(firstType.name).toBe(name)
+        expect(createdStreakType).not.toBeNull()
+        if (createdStreakType === null) {
+            throw new Error('Streak type did not get made')
+        }
     })
 
     it('[UPDATE] should update the streak type with provided id if initiated by owner', async () => {
