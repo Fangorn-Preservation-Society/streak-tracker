@@ -130,23 +130,30 @@ describe('Streak Type API', () => {
         expect(firstType.name).toBe(name)
     })
 
-    it('[UPDATE] should update the name of specified streak type', async () => {
+    it('[UPDATE] should update the streak type with provided id if initiated by owner', async () => {
         // Arrange
         const name = faker.animal.cat()
-        const newName = faker.animal.rabbit()
         const saved = await prisma.streakType.create({
             data: { name, userId: user.id },
         })
 
+        const tokenResponse = await request(app)
+            .post('/api/login')
+            .set('Accept', 'application/json')
+            .send({ email: user.email, password: 'chubby-puppy' })
+        const { token } = tokenResponse.body
+
         // Act
         const response = await request(app)
             .put(`/api/streak-types/${saved.id}`)
-            .send({ name: newName })
             .set('Accept', 'application/json')
+            .set('x-access-token', token)
+            .send({ name: 'gollum' })
         const responseBody = response.body
 
         // Assert
-        expect(responseBody.name).toBe(newName)
+        expect(response.statusCode).toBe(200)
+        expect(responseBody.name).toBe('gollum')
         const updatedStreakType = await prisma.streakType.findUnique({
             where: { id: saved.id },
         })
@@ -154,7 +161,46 @@ describe('Streak Type API', () => {
         if (updatedStreakType === null) {
             throw new Error('Streak type did not exist')
         }
-        expect(updatedStreakType.name).toBe(newName)
+        expect(updatedStreakType.name).toBe('gollum')
+    })
+
+    it("[UPDATE] should prevent user from updating other users' streak types", async () => {
+        // Arrange
+        const name = faker.animal.cat()
+        const saved = await prisma.streakType.create({
+            data: { name, userId: user.id },
+        })
+        const wormtongue = await factories.users.create({
+            password: 'sarumanrules',
+        })
+
+        const tokenResponse = await request(app)
+            .post('/api/login')
+            .set('Accept', 'application/json')
+            .send({ email: wormtongue.email, password: 'sarumanrules' })
+        const { token } = tokenResponse.body
+
+        // Act
+        const response = await request(app)
+            .put(`/api/streak-types/${saved.id}`)
+            .set('Accept', 'application/json')
+            .set('x-access-token', token)
+            .send({ name: 'gollum' })
+        const responseBody = response.body
+
+        // Assert
+        expect(response.statusCode).toBe(404)
+        expect(responseBody).toEqual({
+            message: `unable to find streak type with id ${saved.id}`,
+        })
+        const updatedStreakType = await prisma.streakType.findUnique({
+            where: { id: saved.id },
+        })
+        expect(updatedStreakType).not.toBeNull()
+        if (updatedStreakType === null) {
+            throw new Error('Streak type did not exist')
+        }
+        expect(updatedStreakType.name).toBe(name)
     })
 
     it('[DELETE] should delete the streak type with provided id if initiated by owner', async () => {
