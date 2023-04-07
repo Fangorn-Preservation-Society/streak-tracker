@@ -60,18 +60,30 @@ async function deleteStreakTypeApi(req: Request, res: Response): Promise<void> {
 
 // Update
 async function updateStreakTypeApi(req: Request, res: Response): Promise<void> {
-    const { id } = req.params
-    const { name } = req.body
+    const { userId, params, body } = req
+    const { id } = params
+    const { name } = body
 
-    const updateStreakType = await prisma.streakType.update({
-        where: {
-            id: Number(id),
-        },
-        data: {
-            name,
-        },
+    const streakType = await prisma.streakType.findFirst({
+        where: { id: Number(id), userId },
     })
-    res.status(200).json(updateStreakType)
+
+    if (streakType) {
+        const updateStreakType = await prisma.streakType.update({
+            where: {
+                id: streakType.id,
+            },
+            data: {
+                name,
+            },
+        })
+        res.status(200).json(updateStreakType)
+        return
+    }
+
+    res.status(404).json({
+        message: `unable to find streak type with id ${id}`,
+    })
 }
 
 export {
