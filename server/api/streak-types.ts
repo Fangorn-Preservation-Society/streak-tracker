@@ -1,8 +1,9 @@
-import { Request, Response } from 'express'
+import { Response } from 'express'
 import { prisma } from '../prisma'
+import { AuthedRequest } from '../types/request'
 
 // Index - get a list of StreakTypes
-async function getStreakTypesApi(req: Request, res: Response) {
+async function getStreakTypesApi(req: AuthedRequest, res: Response) {
     const { userId } = req
     res.status(200).json(
         await prisma.streakType.findMany({
@@ -14,7 +15,7 @@ async function getStreakTypesApi(req: Request, res: Response) {
 }
 
 // Show - get 1 specific prisma.streakType
-async function showStreakTypeApi(req: Request, res: Response) {
+async function showStreakTypeApi(req: AuthedRequest, res: Response) {
     const { userId, params } = req
     const { id } = params
     const streakType = await prisma.streakType.findFirst({
@@ -31,7 +32,10 @@ async function showStreakTypeApi(req: Request, res: Response) {
 }
 
 // Create
-async function createStreakTypeApi(req: Request, res: Response): Promise<void> {
+async function createStreakTypeApi(
+    req: AuthedRequest,
+    res: Response
+): Promise<void> {
     const { userId, body } = req
     const { name } = body
 
@@ -43,7 +47,10 @@ async function createStreakTypeApi(req: Request, res: Response): Promise<void> {
 }
 
 // Delete
-async function deleteStreakTypeApi(req: Request, res: Response): Promise<void> {
+async function deleteStreakTypeApi(
+    req: AuthedRequest,
+    res: Response
+): Promise<void> {
     const { userId, params } = req
     const { id } = params
     const streakType = await prisma.streakType.findFirst({
@@ -63,7 +70,10 @@ async function deleteStreakTypeApi(req: Request, res: Response): Promise<void> {
 }
 
 // Update
-async function updateStreakTypeApi(req: Request, res: Response): Promise<void> {
+async function updateStreakTypeApi(
+    req: AuthedRequest,
+    res: Response
+): Promise<void> {
     const { userId, params, body } = req
     const { id } = params
     const { name } = body
